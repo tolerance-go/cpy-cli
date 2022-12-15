@@ -35,7 +35,7 @@ test('path structure', async t => {
 	fs.mkdirSync(path.join(t.context.tmp, 'out'));
 	fs.writeFileSync(path.join(t.context.tmp, 'cwd/hello.js'), 'console.log("hello");');
 
-	await execa('./cli.js', [path.join(t.context.tmp, '**'), path.join(t.context.tmp, 'out')]);
+	await execa('./cli.js', [path.join(t.context.tmp, '**'), path.join(t.context.tmp, 'out'), '--no-flat']);
 
 	t.is(
 		read(t.context.tmp, 'cwd/hello.js'),
@@ -48,11 +48,11 @@ test('rename filenames but not filepaths', async t => {
 	fs.mkdirSync(path.join(t.context.tmp, 'dest'));
 	fs.writeFileSync(path.join(t.context.tmp, 'hello.js'), 'console.log("hello");');
 
-	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest'), '--rename=hi.js']);
+	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest'), '--rename=hi.js', '--no-flat']);
 
 	t.is(read(t.context.tmp, 'hello.js'), read(t.context.tmp, 'dest/hi.js'));
 
-	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest'), '--rename=hi-{{basename}}-1']);
+	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest'), '--rename=hi-{{basename}}-1', '--no-flat']);
 	t.is(read(t.context.tmp, 'hello.js'), read(t.context.tmp, 'dest/hi-hello-1.js'));
 });
 
@@ -62,7 +62,7 @@ test('overwrite files by default', async t => {
 	fs.writeFileSync(path.join(t.context.tmp, 'hello.js'), 'console.log("hello");');
 	fs.writeFileSync(path.join(t.context.tmp, 'dest/hello.js'), 'console.log("world");');
 
-	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest')]);
+	await execa('./cli.js', [path.join(t.context.tmp, 'hello.js'), path.join(t.context.tmp, 'dest'), '--no-flat']);
 
 	t.is(read(t.context.tmp, 'dest/hello.js'), 'console.log("hello");');
 });
@@ -75,7 +75,7 @@ test('do not copy files in the negated glob patterns', async t => {
 	fs.writeFileSync(path.join(t.context.tmp, 'src/hello.jsx'), 'console.log("world");');
 	fs.writeFileSync(path.join(t.context.tmp, 'src/hello.es2015'), 'console.log("world");');
 
-	await execa('./cli.js', ['src/*.*', '!src/*.jsx', '!src/*.es2015', path.join(t.context.tmp, 'dest'), '--cwd', t.context.tmp]);
+	await execa('./cli.js', ['src/*.*', '!src/*.jsx', '!src/*.es2015', path.join(t.context.tmp, 'dest'), '--cwd', t.context.tmp, '--no-flat']);
 
 	t.is(read(t.context.tmp, 'dest/hello.js'), 'console.log("hello");');
 	t.false(pathExistsSync(path.join(t.context.tmp, 'dest/hello.jsx')));
@@ -90,7 +90,7 @@ test('flatten directory tree', async t => {
 	fs.writeFileSync(path.join(t.context.tmp, 'source/bar.js'), 'console.log("bar");');
 	fs.writeFileSync(path.join(t.context.tmp, 'source/nested/baz.ts'), 'console.log("baz");');
 
-	await execa('./cli.js', ['**/*.js', 'destination/subdir', '--cwd', t.context.tmp, '--flat']);
+	await execa('./cli.js', ['**/*.js', 'destination/subdir', '--cwd', t.context.tmp]);
 
 	t.is(
 		read(t.context.tmp, 'foo.js'),
