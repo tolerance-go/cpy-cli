@@ -15,6 +15,7 @@ const cli = meow(`
 	  --dot                Allow patterns to match entries that begin with a period (.)
 	  --flat               Flatten directory structure. All copied files will be put in the same directory.
 	  --concurrency        Number of files being copied concurrently
+	  --no-throw           如果出现复制错误，不抛出，而是保证程序正常结束
 
 	<source> can contain globs if quoted
 
@@ -30,6 +31,10 @@ const cli = meow(`
 `, {
 	importMeta: import.meta,
 	flags: {
+		throw: {
+			type: 'boolean',
+			default: true,
+		},
 		overwrite: {
 			type: 'boolean',
 			default: true,
@@ -73,6 +78,14 @@ const cli = meow(`
 			concurrency: cli.flags.concurrency,
 		});
 	} catch (error) {
+		if (!cli.flags.throw) {
+			if (error.name === 'CpyError') {
+				console.error(error.message);
+			}
+
+			return;
+		}
+
 		if (error.name === 'CpyError') {
 			console.error(error.message);
 			process.exit(1);
